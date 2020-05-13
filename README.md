@@ -2,7 +2,7 @@
 
 **Natural Language Inference on SNLI**
 
-To run the code(For testing):
+To run the code (for testing):
 	
 ```python main.py```
 	
