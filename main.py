@@ -85,7 +85,6 @@ print("Logistic Regression accuracy on test set:", log_reg_acc, "%")
 with open("tfidf.txt", "w") as f:
 	f.write("\n".join(preds))
 
-
 ############################## Part 2: Deep Model ######################################
 
 with open('model/vocab_to_index.pkl', 'rb') as f:
@@ -136,6 +135,8 @@ n_vocab = len(vocab_to_index)
 p_max_length = max(p_test_lens)
 h_max_length = max(h_test_lens)
 
+batch_size = 128
+
 def get_test_batches(batch_size):
     num_batches = len(p_test)//batch_size
     last_batch_size = len(p_test) - num_batches*batch_size
@@ -153,9 +154,16 @@ def get_test_batches(batch_size):
             yield padded_p, padded_h, p_test_lens[b:b+batch_size], h_test_lens[b:b+batch_size], \
                 np.array(y_test[b:b+batch_size])
         else:
-            yield padded_p[:last_batch_size-1], padded_h[:last_batch_size-1], \
-                p_test_lens[b:b+last_batch_size-1], h_test_lens[b:b+last_batch_size-1], \
-                np.array(y_test[b:b+last_batch_size-1])
+            yield padded_p[:last_batch_size], padded_h[:last_batch_size], \
+                p_test_lens[b:b+last_batch_size], h_test_lens[b:b+last_batch_size], \
+                np.array(y_test[b:b+last_batch_size])
+
+# # Function to check get_test_batches
+# cnt = 0
+# for p, h, p_lens, h_lens, y in get_test_batches(batch_size):
+#     print(len(p_lens))
+#     cnt += len(p_lens)
+# print(cnt)
 
 import torch
 import torch.nn as nn
@@ -247,8 +255,6 @@ model = LSTM(model_hyperparams).to(device)
 
 # Load saved model
 model.load_state_dict(torch.load('model/deep_model'))
-
-batch_size = 128
 
 # Function to get loss and accuracy on test data
 def evaluate(batch_size):
